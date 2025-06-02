@@ -1,0 +1,27 @@
+{
+  "name": "phonebook_backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/2Tucho/Phonebook_Backend.git"
+  },
+  "author": "Alberto Gonzalez \"Tucho\"",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/2Tucho/Phonebook_Backend/issues"
+  },
+  "homepage": "https://github.com/2Tucho/Phonebook_Backend#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
