@@ -3,7 +3,7 @@ const app = express()
 
 app.use(express.json())
 
-const persons = [
+let persons = [
     {
         "id": 1,
         "name": "Arto Hellas",
@@ -46,6 +46,14 @@ app.get('/api/persons/:id', (request, response) => {
   } else {
     response.status(404).end()
   }
+})
+
+//DELETE 1 PERSON http://localhost:3001/api/persons/1
+app.delete('/api/persons/:id', (request, response) => {
+  const id = Number(request.params.id) // La variable id contiene una cadena '1', mientras que los ids de las notas son números enteros
+  persons = persons.filter(person => person.id !== id)
+
+  response.status(204).end()
 })
 
 const PORT = 3001
