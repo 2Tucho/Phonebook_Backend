@@ -26,7 +26,7 @@ const persons = [
     }
 ]
 
-//http://localhost:3001/api/persons
+//GET http://localhost:3001/api/persons
 app.get('/api/persons', (request, response) => {
     console.log(response);
     response.json(persons)
