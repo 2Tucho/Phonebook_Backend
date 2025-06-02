@@ -26,14 +26,26 @@ const persons = [
     }
 ]
 
-//GET http://localhost:3001/api/persons
+//GET ALL PERSONS http://localhost:3001/api/persons
 app.get('/api/persons', (request, response) => {
     response.json(persons)
 })
 
-//GET http://localhost:3001/info
+//GET INFO http://localhost:3001/info
 app.get('/info', (request, response) => {
     response.send(`<p>Phonebook has info for ${persons.length} people</p> <p>${Date()}</p>`)
+})
+
+//GET 1 PERSON http://localhost:3001/api/persons/1
+app.get('/api/persons/:id', (request, response) => {
+  const id = Number(request.params.id)
+  const person = persons.find(person => person.id === id)
+
+  if (person) {
+    response.json(person)
+  } else {
+    response.status(404).end()
+  }
 })
 
 const PORT = 3001
