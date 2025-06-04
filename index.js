@@ -1,9 +1,18 @@
-const express = require('express')
+const express = require("express")
 const app = express()
+const morgan = require("./morgan")
+const cors = require('cors')
 
+app.use(cors())
+app.use(express.static('dist'))
 app.use(express.json())
 
-const persons = [
+// TOKEN PREDEFINIDOS == :method :url :status :res[content-length] - :response-time ms   --->   GET /api/persons 200 223 - 2.551 ms
+// TOKEN PERSONALIZADO == :body   --->   Definido en el archivo morgan.js
+app.use(morgan(':method :url :status - :res[content-length] :response-time ms :body'));
+
+
+let persons = [
     {
         "id": 1,
         "name": "Arto Hellas",
@@ -26,10 +35,64 @@ const persons = [
     }
 ]
 
-//http://localhost:3001/api/persons
-app.get('/api/persons', (request, response) => {
-    console.log(response);
+//GET ALL PERSONS http://localhost:3001/api/persons
+app.get("/api/persons", (request, response) => {
     response.json(persons)
+})
+
+//GET INFO http://localhost:3001/info
+app.get("/info", (request, response) => {
+    response.send(`<p>Phonebook has info for ${persons.length} people</p> <p>${Date()}</p>`)
+})
+
+//GET 1 PERSON http://localhost:3001/api/persons/1
+app.get("/api/persons/:id", (request, response) => {
+    const id = Number(request.params.id)
+    const person = persons.find(person => person.id === id)
+
+    if (person) {
+        response.json(person)
+    } else {
+        response.status(404).end()
+    }
+})
+
+//DELETE 1 PERSON http://localhost:3001/api/persons/1
+app.delete("/api/persons/:id", (request, response) => {
+    const id = Number(request.params.id) // La variable id contiene una cadena "1", mientras que los ids de las notas son números enteros
+    persons = persons.filter(person => person.id !== id)
+
+    response.status(204).end()
+})
+
+const generateRandomId = (min, max) => {
+    const id = Math.floor(Math.random() * (max - min + 1)) + min
+    return id
+}
+
+//POST NEW PERSON http://localhost:3001/api/persons
+app.post("/api/persons", (request, response) => {
+    const body = request.body
+
+    if (!body.name || !body.number) {
+        return response.status(400).json({
+            error: "name or number missing"
+        })
+    } else if (persons.find(elem => elem.name == body.name)) {
+        return response.status(400).json({
+            error: "name must be unique"
+        })
+    }
+
+    const person = {
+        id: generateRandomId(1, 1000),
+        name: body.name,
+        number: body.number,
+    }
+
+    persons = persons.concat(person)
+
+    response.json(person)
 })
 
 const PORT = 3001
