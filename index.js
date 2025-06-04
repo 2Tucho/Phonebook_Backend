@@ -1,7 +1,10 @@
 const express = require("express")
 const app = express()
 const morgan = require("./morgan")
+const cors = require('cors')
 
+app.use(cors())
+app.use(express.static('dist'))
 app.use(express.json())
 
 // TOKEN PREDEFINIDOS == :method :url :status :res[content-length] - :response-time ms   --->   GET /api/persons 200 223 - 2.551 ms
