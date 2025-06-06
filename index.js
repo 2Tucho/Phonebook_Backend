@@ -47,7 +47,8 @@ app.get('/api/persons', (request, response) => {
 
 //GET INFO http://localhost:3001/info
 app.get("/info", (request, response) => {
-    response.send(`<p>Phonebook has info for ${persons.length} people</p> <p>${Date()}</p>`)
+    response.send(`<p>Phonebook has info for ${Person.length} people</p> <p>${Date()}</p>`)
+    console.log(Person)
 })
 
 //GET 1 PERSON http://localhost:3001/api/persons/1
