@@ -3,6 +3,7 @@ const express = require("express")
 const app = express()
 const morgan = require("./morgan")
 const Person = require('./models/person')
+const mongoose = require('mongoose')
 const cors = require('cors')
 
 app.use(cors())
@@ -40,8 +41,8 @@ app.use(morgan(':method :url :status - :res[content-length] :response-time ms :b
 //GET ALL PERSONS http://localhost:3001/api/persons
 app.get('/api/persons', (request, response) => {
   Person.find({}).then(persons => {
-    console.log("hola")
     response.json(persons)
+    mongoose.connection.close()
   })
 })
 
@@ -77,28 +78,22 @@ const generateRandomId = (min, max) => {
 }
 
 //POST NEW PERSON http://localhost:3001/api/persons
-app.post("/api/persons", (request, response) => {
-    const body = request.body
+app.post('/api/persons', (request, response) => {
+  const body = request.body
 
-    if (!body.name || !body.number) {
-        return response.status(400).json({
-            error: "name or number missing"
-        })
-    } else if (persons.find(elem => elem.name == body.name)) {
-        return response.status(400).json({
-            error: "name must be unique"
-        })
-    }
+  if (!body.name || !body.number) {
+    return response.status(400).json({ error: 'content missing' })
+  }
 
-    const person = {
-        id: generateRandomId(1, 1000),
-        name: body.name,
-        number: body.number,
-    }
+  const person = new Person({
+    name: body.name,
+    number: body.number,
+  })
 
-    persons = persons.concat(person)
-
-    response.json(person)
+  person.save().then((savedPerson) => {
+    response.json(savedPerson)
+    mongoose.connection.close()
+  })
 })
 
 const PORT = process.env.PORT
