@@ -52,7 +52,7 @@ app.get("/info", (request, response) => {
 })
 
 //GET 1 PERSON http://localhost:3001/api/persons/1
-app.get('/api/persons/:id', (request, response, next) => {
+app.get("/api/persons/:id", (request, response, next) => {
   Person.findById(request.params.id)
     .then(person => {
       if (person) {
@@ -75,6 +75,22 @@ app.delete("/api/persons/:id", (request, response, next) => {
     .catch(error => next(error))
 })
 
+//PUT CHANGE NUMBER http://localhost:3001/api/persons/1
+app.put('/api/persons/:id', (request, response, next) => {
+  const body = request.body
+
+  const person = {
+    name: body.name,
+    number: body.number,
+  }
+
+  Person.findByIdAndUpdate(request.params.id, person, { new: true }) // Agregamos el parámetro opcional { new: true }, que hará que nuestro controlador de eventos sea llamado con el nuevo documento modificado en lugar del original.
+    .then(updatedPerson => {
+      response.json(updatedPerson)
+    })
+    .catch(error => next(error))
+})
+
 //POST NEW PERSON http://localhost:3001/api/persons
 app.post("/api/persons", (request, response, next) => {
   const body = request.body
@@ -93,18 +109,26 @@ app.post("/api/persons", (request, response, next) => {
   }).catch(error => next(error))
 })
 
+// Middleware después de nuestras rutas, que se usa para capturar solicitudes realizadas a rutas inexistentes. 
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: "unknown endpoint" })
+}
+
+app.use(unknownEndpoint)
+
 // Controlador de errores
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
 
-  if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformatted id' })
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted id" })
   } 
 
   next(error)
 }
 
 app.use(errorHandler)
+
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
