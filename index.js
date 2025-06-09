@@ -46,10 +46,12 @@ app.get("/api/persons", (request, response, next) => {
 })
 
 //GET INFO http://localhost:3001/info
-app.get("/info", (request, response) => {
-    response.send(`<p>Phonebook has info for ${Person.length} people</p> <p>${Date()}</p>`)
-    console.log(Person)
+app.get("/info", (request, response, next) => {
+  Person.find({}).then(persons => {
+    response.json(`Phonebook has info for ${persons.length} people ${Date()}`) 
+  }).catch(error => next(error))
 })
+
 
 //GET 1 PERSON http://localhost:3001/api/persons/1
 app.get("/api/persons/:id", (request, response, next) => {
