@@ -3,7 +3,6 @@ const express = require("express")
 const app = express()
 const morgan = require("./morgan")
 const Person = require("./models/person")
-const mongoose = require("mongoose")
 const cors = require("cors")
 
 app.use(cors())
@@ -48,7 +47,7 @@ app.get("/api/persons", (request, response, next) => {
 //GET INFO http://localhost:3001/info
 app.get("/info", (request, response, next) => {
   Person.find({}).then(persons => {
-    response.json(`Phonebook has info for ${persons.length} people ${Date()}`) 
+    response.json(`Phonebook has info for ${persons.length} people ${Date()}`)
   }).catch(error => next(error))
 })
 
@@ -69,7 +68,7 @@ app.get("/api/persons/:id", (request, response, next) => {
 //DELETE 1 PERSON http://localhost:3001/api/persons/1
 app.delete("/api/persons/:id", (request, response, next) => {
   console.log(Person.findByIdAndDelete(request.params.id));
-  
+
   Person.findByIdAndDelete(request.params.id)
     .then(result => {
       response.status(204).end()
@@ -79,14 +78,10 @@ app.delete("/api/persons/:id", (request, response, next) => {
 
 //PUT CHANGE NUMBER http://localhost:3001/api/persons/1
 app.put('/api/persons/:id', (request, response, next) => {
-  const body = request.body
+  const { name, number } = request.body
 
-  const person = {
-    name: body.name,
-    number: body.number,
-  }
-
-  Person.findByIdAndUpdate(request.params.id, person, { new: true }) // Agregamos el parámetro opcional { new: true }, que hará que nuestro controlador de eventos sea llamado con el nuevo documento modificado en lugar del original.
+  Person.findByIdAndUpdate(request.params.id, { name, number },
+    { new: true, runValidators: true, context: 'query' }) // Agregamos el parámetro opcional { new: true }, que hará que nuestro controlador de eventos sea llamado con el nuevo documento modificado en lugar del original.
     .then(updatedPerson => {
       response.json(updatedPerson)
     })
@@ -97,18 +92,19 @@ app.put('/api/persons/:id', (request, response, next) => {
 app.post("/api/persons", (request, response, next) => {
   const body = request.body
 
-  if (!body.name || !body.number) {
-    return response.status(400).json({ error: "content missing" })
-  }
-
   const person = new Person({
     name: body.name,
     number: body.number,
   })
 
-  person.save().then((savedPerson) => {
-    response.json(savedPerson)
-  }).catch(error => next(error))
+  person.save()
+    .then((savedPerson) => {
+      response.json(savedPerson)
+    })
+    .catch(error => {
+      console.log(error)
+      next(error)
+    })
 })
 
 // Middleware después de nuestras rutas, que se usa para capturar solicitudes realizadas a rutas inexistentes. 
@@ -124,6 +120,8 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === "CastError") {
     return response.status(400).send({ error: "malformatted id" })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
   } 
 
   next(error)
@@ -134,5 +132,5 @@ app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
+  console.log(`Server running on port ${PORT}`)
 })
